@@ -1,12 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Find a Geneticist</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-sA+e2sYp3+1XnYhY+1x3+1XnYhY+1x3+1XnYhY+1x3+1XnYhY="
+    crossorigin=""
+  />
 </head>
 <body>
-  <h1>Find a Geneticist</h1>
-  <div id="geneticists"></div>
+  <header>
+    <h1>Find a Geneticist</h1>
+    <div class="controls">
+      <input type="text" id="search" placeholder="Search by name, institution, or expertise..." />
+      <select id="sort">
+        <option value="">Sort by</option>
+        <option value="0">Name</option>
+        <option value="2">Institution</option>
+        <option value="3">Expertise</option>
+      </select>
+      <a href="https://docs.google.com/forms/d/your-form-id/viewform" target="_blank">
+        <button>Add Yourself to the Directory</button>
+      </a>
+    </div>
+  </header>
+  <main>
+    <div id="geneticists"></div>
+    <div id="map"></div>
+  </main>
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-o9N1j7kP1+1XnYhY+1x3+1XnYhY+1x3+1XnYhY+1x3+1XnYhY="
+    crossorigin=""
+  ></script>
   <script src="script.js"></script>
 </body>
 </html>
