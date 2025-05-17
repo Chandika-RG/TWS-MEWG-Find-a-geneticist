@@ -8,22 +8,22 @@ fetch(sheetURL)
     const container = document.getElementById('geneticists');
     container.innerHTML = '';
 
-    rows.forEach(row => {
+    rows.forEach((row, index) => {
+      if (index === 0) return; // skip header row
       const c = row.c;
 
-      // Only display columns B (1) to J (9)
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
-        <p><strong>Name:</strong> ${c[1]?.v || ''}</p>
-        <p><strong>Email:</strong> ${c[2]?.v || ''}</p>
-        <p><strong>Institution:</strong> ${c[3]?.v || ''}</p>
-        <p><strong>Position:</strong> ${c[4]?.v || ''}</p>
-        <p><strong>Country:</strong> ${c[5]?.v || ''}</p>
-        <p><strong>State/Province:</strong> ${c[6]?.v || ''}</p>
-        <p><strong>Research Focus:</strong> ${c[7]?.v || ''}</p>
-        <p><strong>Application Area:</strong> ${c[8]?.v || ''}</p>
-        <p><strong>Website:</strong> ${c[9]?.v ? `<a href="${c[9].v}" target="_blank">${c[9].v}</a>` : ''}</p>
+        <h3>${c[0]?.v || 'No Name'}</h3>
+        <p><strong>Email:</strong> ${c[1]?.v || ''}</p>
+        <p><strong>Phone:</strong> ${c[2]?.v || ''}</p>
+        <p><strong>Affiliation:</strong> ${c[3]?.v || ''}</p>
+        <p><strong>Title:</strong> ${c[4]?.v || ''}</p>
+        <p><strong>Website:</strong> ${c[5]?.v ? `<a href="${c[5].v}" target="_blank">${c[5].v}</a>` : ''}</p>
+        <p><strong>Taxon Expertise:</strong> ${c[6]?.v || ''}</p>
+        <p><strong>Subject Matter:</strong> ${c[7]?.v || ''}</p>
+        <p><strong>Data & Analytics Expertise:</strong> ${c[8]?.v || ''}</p>
       `;
       container.appendChild(card);
     });
