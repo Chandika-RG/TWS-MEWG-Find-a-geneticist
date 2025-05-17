@@ -3,51 +3,29 @@ const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNX
 fetch(sheetURL)
   .then(res => res.text())
   .then(text => {
-    const json = JSON.parse(text.substring(47).slice(0, -2));
+    const json = JSON.parse(text.substring(47, text.length - 2));
     const rows = json.table.rows;
     const container = document.getElementById('geneticists');
     container.innerHTML = '';
 
     rows.forEach(row => {
-      const cells = row.c;
+      const c = row.c;
+
+      // Only display columns B (1) to J (9)
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
-        <h3>${cells[0]?.v || 'No Name'}</h3>
-        <p><strong>Email:</strong> ${cells[1]?.v || ''}</p>
-        <p><strong>Institution:</strong> ${cells[2]?.v || ''}</p>
-        <p><strong>Expertise:</strong> ${cells[3]?.v || ''}</p>
-        <p><strong>Location:</strong> ${cells[4]?.v || ''}</p>
+        <p><strong>Name:</strong> ${c[1]?.v || ''}</p>
+        <p><strong>Email:</strong> ${c[2]?.v || ''}</p>
+        <p><strong>Institution:</strong> ${c[3]?.v || ''}</p>
+        <p><strong>Position:</strong> ${c[4]?.v || ''}</p>
+        <p><strong>Country:</strong> ${c[5]?.v || ''}</p>
+        <p><strong>State/Province:</strong> ${c[6]?.v || ''}</p>
+        <p><strong>Research Focus:</strong> ${c[7]?.v || ''}</p>
+        <p><strong>Application Area:</strong> ${c[8]?.v || ''}</p>
+        <p><strong>Website:</strong> ${c[9]?.v ? `<a href="${c[9].v}" target="_blank">${c[9].v}</a>` : ''}</p>
       `;
       container.appendChild(card);
     });
   })
-  .catch(err => console.error('Error loading data', err));
-
-          }
-        });
-    }
-  });
-}
-
-document.getElementById('search').addEventListener('input', function() {
-  const query = this.value.toLowerCase();
-  const filtered = dataRows.filter(row => {
-    return row.c.some(cell => cell?.v?.toString().toLowerCase().includes(query));
-  });
-  renderCards(filtered);
-});
-
-document.getElementById('sort').addEventListener('change', function() {
-  const colIndex = parseInt(this.value);
-  if (!isNaN(colIndex)) {
-    dataRows.sort((a, b) => {
-      const valA = a.c[colIndex]?.v?.toLowerCase() || '';
-      const valB = b.c[colIndex]?.v?.toLowerCase() || '';
-      return valA.localeCompare(valB);
-    });
-    renderCards(dataRows);
-  }
-});
-
-fetchData();
+  .catch(error => console.error('Error fetching or parsing data:', error));
