@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Find a Geneticist</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Find a Geneticist</h1>
+        <p>Welcome! Find a Geneticist or add yourself to the list.</p>
+    </header>
+    <main>
+        <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pubhtml?gid=332580297&range=A1:I&single=true" width="800" height="400"></iframe>
+
+      <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search by keyword...">
+            <button onclick="searchTable()">Search</button>
+        </div>
+       <div id="searchResults"></div>
+
+
+        <div class="add-yourself-section">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" class="button" target="_blank">Add Yourself</a>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2025 Find a Geneticist</p>
+    </footer>
+
+<script>
+function searchTable() {
+  const searchInput = document.getElementById('searchInput').value.toLowerCase();
+  const iframe = document.querySelector('iframe');
+  const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+  const table = iframeDocument.querySelector('table');
+  const searchResultsDiv = document.getElementById('searchResults');
+
+  searchResultsDiv.innerHTML = ''; // Clear previous results
+
+    if(!table){
+        searchResultsDiv.innerHTML = '<p>Unable to find the table to perform a search.</p>';
+        return;
+    }
+    const rows = table.querySelectorAll('tbody tr');
+
+    let resultsFound = false;
+  rows.forEach(row => {
+      const rowText = row.textContent.toLowerCase();
+    if (rowText.includes(searchInput)) {
+        searchResultsDiv.appendChild(row.cloneNode(true));
+        resultsFound = true;
+    }
+  });
+    if(!resultsFound){
+         searchResultsDiv.innerHTML = '<p>No matching rows found.</p>';
+    }
+}
+
+</script>
+</body>
+</html>
