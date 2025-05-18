@@ -2,8 +2,8 @@
 <html>
 <head>
     <title>Find a Geneticist</title>
-    <link relForm Responses/style.css">
-    <style>
+    <link rel="stylesheet" type="text/css" href="style.css">
+     <style>
          .filter-container {
              margin-bottom: 10px;
              display: flex;
@@ -12,7 +12,7 @@
          .highlight {
              background-color: yellow;
          }
-    </style>
+     </style>
 </head>
 <body>
     <header>
@@ -20,22 +20,22 @@
         <p>Welcome! Find a Geneticist or add yourself to the list.</p>
     </header>
     <main>
-        <iframe id="dataSheet" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pubhtml?gid=332580297&range=A1:I&single=true" width="800" height="400"></iframe>
+        <iframe id="dataSheet" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECariera-j-j-1/pubhtml?gid=332580297&range=A1:I&single=true" width="800" height="400"></iframe>
 
       <div class="filter-container">
             <input type="text" id="taxonFilter" placeholder="Filter by Taxon...">
             <input type="text" id="expertiseFilter" placeholder="Filter by Data Expertise...">
-            <input type="text" id="subjectFilter" placeholder="Filter by Subject Matter...">
+            <input type="textIdo/subjectFilter" placeholder="Filter by Subject Matter...">
         </div>
-    <div class Continental Airlines/filter-container">
+    <div class="filter-container">
             <button onclick="filterTable()">Filter</button>
             <button onclick="clearFilters()">Clear Filters</button>
     </div>
        <div id="searchResults"></div>
 
 
-        <div classivers/add-yourself-section">
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" classapp-button" target="_blank">Add Yourself</a>
+        <div class="add-yourself-section">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" class="button" target="_blank">Add Yourself</a>
         </div>
     </main>
     <footer>
@@ -50,32 +50,70 @@ function filterTable() {
     const iframe = document.getElementById('dataSheet');
     const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
     const table = iframeDocument.querySelector('table');
+    const searchResultsDiv = document.getElementById('searchResults');
+
 
     if(!table){
-        searchResultsDiv.innerHTML = '<p>Unable to find the table to perform a search.</p>';
+         searchResultsDiv.innerHTML = '<p>Unable to find the table to perform a search.</p>';
         return;
     }
-
+    searchResultsDiv.innerHTML = '';
     const rows = table.querySelectorAll('tbody tr');
-    rows.forEach(row => {
-      const cells = row.querySelectorAll('td');
-      let match = true;
-      if(taxonFilter && cells[6] && !cells[6].textContent.toLowerCase().includes(taxonFilter)){
-          match = false;
-      }
-      if(expertiseFilter && cells[8] && !cells[8].textContent.toLowerCase().includes(expertiseFilter)){
-          match = false;
-      }
-       if(subjectFilter && cells[7] && !cells[7].textContent.toLowerCase().includes(subjectFilter)){
-          match = false;
-      }
 
-      if(match){
-          row.classList.add('highlight');
-      }else{
-          row.classList.remove('highlight');
-      }
+    let resultsFound = false;
+    const resultsTable = document.createElement('table');
+    resultsTable.innerHTML = "<thead><tr><th>Name</th><th>Institution</th><th>Contact</th><th>Area of Expertise</th><th>Species</th><th>Methods</th><th>Keywords</th><th>Resources</th><th>Notes</th></tr></thead>";
+    const resultsBody = document.createElement('tbody');
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+      let match = true;
+       if(taxonFilter){
+        const taxonCell = cells ? cells[6] : null;
+         if(taxonCell){
+            const words = taxonCell.textContent.toLowerCase().split(',').map(word => word.trim());
+          if(!words.some(word => word.includes(taxonFilter))){
+               match = false;
+          }
+          } else {
+            match = false;
+          }
+       }
+        if(expertiseFilter){
+            const expertiseCell = cells ? cells[7] : null;
+             if(expertiseCell){
+               const words = expertiseCell.textContent.toLowerCase().split(',').map(word => word.trim());
+              if(!words.some(word => word.includes(expertiseFilter))){
+                   match = false;
+              }
+          } else {
+            match = false;
+          }
+       }
+         if(subjectFilter){
+          const subjectCell = cells ? cells[8] : null;
+           if(subjectCell){
+            const words = subjectCell.textContent.toLowerCase().split(',').map(word => word.trim());
+            if(!words.some(word => word.includes(subjectFilter))){
+               match = false;
+             }
+          }else {
+            match = false;
+          }
+       }
+    if(match){
+        resultsBody.appendChild(row.cloneNode(true));
+        resultsFound = true;
+    }
+
     });
+
+    if (resultsFound) {
+        resultsTable.appendChild(resultsBody);
+        searchResultsDiv.appendChild(resultsTable);
+    } else {
+      searchResultsDiv.innerHTML = '<p>No matching rows found.</p>';
+    }
 }
 function clearFilters() {
     document.getElementById('taxonFilter').value = '';
