@@ -4,9 +4,14 @@
     <title>Find a Geneticist</title>
     <link rel="stylesheet" type="text/css" href="style.css">
     <style>
-        .highlight {
-            background-color: yellow;
-        }
+         .filter-container {
+             margin-bottom: 10px;
+             display: flex;
+             gap: 10px;
+         }
+         .highlight {
+             background-color: yellow;
+         }
     </style>
 </head>
 <body>
@@ -17,15 +22,20 @@
     <main>
         <iframe id="dataSheet" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pubhtml?gid=332580297&range=A1:I&single=true" width="800" height="400"></iframe>
 
-      <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search by keyword...">
-            <button onclick="searchTable()">Search</button>
+      <div class="filter-container">
+            <input type="text" id="taxonFilter" placeholder="Filter by Taxon...">
+            <input type="text" id="expertiseFilter" placeholder="Filter by Data Expertise...">
+            <input type="text" id="subjectFilter" placeholder="Filter by Subject Matter...">
         </div>
+    <div class="filter-container">
+            <button onclick="filterTable()">Filter</button>
+            <button onclick="clearFilters()">Clear Filters</button>
+    </div>
        <div id="searchResults"></div>
 
 
         <div class="add-yourself-section">
-            <a href="https://docs.google.comrive/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" class="button" target="_blank">Add Yourself</a>
+            <a href="https://docs.google.com/forms/drive/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" class="button" target="_blank">Add Yourself</a>
         </div>
     </main>
     <footer>
@@ -33,12 +43,13 @@
     </footer>
 
 <script>
-function searchTable() {
-    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+function filterTable() {
+    const taxonFilter = document.getElementById('taxonFilter').value.toLowerCase();
+    const expertiseFilter = document.getElementById('expertiseFilter').value.toLowerCase();
+    const subjectFilter = document.getElementById('subjectFilter').value.toLowerCase();
     const iframe = document.getElementById('dataSheet');
     const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
     const table = iframeDocument.querySelector('table');
-    const searchResultsDiv = document.getElementById('searchResults');
 
     if(!table){
         searchResultsDiv.innerHTML = '<p>Unable to find the table to perform a search.</p>';
@@ -47,13 +58,30 @@ function searchTable() {
 
     const rows = table.querySelectorAll('tbody tr');
     rows.forEach(row => {
-        const rowText = row.textContent.toLowerCase();
-        if (rowText.includes(searchInput)) {
+      const rowText = row.textContent.toLowerCase();
+      let match = true;
+      if(taxonFilter && !rowText.includes(taxonFilter)){
+          match = false;
+      }
+      if(expertiseFilter && !rowText.includes(expertiseFilter)){
+          match = false;
+      }
+      if(subjectFilter && !rowText.includes(subjectFilter)){
+          match = false;
+      }
+
+      if(match){
           row.classList.add('highlight');
-        }else{
+      }else{
           row.classList.remove('highlight');
-        }
+      }
     });
+}
+function clearFilters() {
+        document.getElementById('taxonFilter').value = '';
+    document.getElementById('expertiseFilter').value = '';
+    document.getElementById('subjectFilter').value = '';
+    filterTable();
 }
 </script>
 </body>
