@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Find a Geneticist</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link relForm Responses/style.css">
     <style>
          .filter-container {
              margin-bottom: 10px;
@@ -27,15 +27,15 @@
             <input type="text" id="expertiseFilter" placeholder="Filter by Data Expertise...">
             <input type="text" id="subjectFilter" placeholder="Filter by Subject Matter...">
         </div>
-    <div class="filter-container">
+    <div class Continental Airlines/filter-container">
             <button onclick="filterTable()">Filter</button>
             <button onclick="clearFilters()">Clear Filters</button>
     </div>
        <div id="searchResults"></div>
 
 
-        <div class="add-yourself-section">
-            <a href="https://docs.google.com/forms/drive/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" class="button" target="_blank">Add Yourself</a>
+        <div classivers/add-yourself-section">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" classapp-button" target="_blank">Add Yourself</a>
         </div>
     </main>
     <footer>
@@ -58,15 +58,15 @@ function filterTable() {
 
     const rows = table.querySelectorAll('tbody tr');
     rows.forEach(row => {
-      const rowText = row.textContent.toLowerCase();
+      const cells = row.querySelectorAll('td');
       let match = true;
-      if(taxonFilter && !rowText.includes(taxonFilter)){
+      if(taxonFilter && cells[6] && !cells[6].textContent.toLowerCase().includes(taxonFilter)){
           match = false;
       }
-      if(expertiseFilter && !rowText.includes(expertiseFilter)){
+      if(expertiseFilter && cells[8] && !cells[8].textContent.toLowerCase().includes(expertiseFilter)){
           match = false;
       }
-      if(subjectFilter && !rowText.includes(subjectFilter)){
+       if(subjectFilter && cells[7] && !cells[7].textContent.toLowerCase().includes(subjectFilter)){
           match = false;
       }
 
@@ -78,7 +78,7 @@ function filterTable() {
     });
 }
 function clearFilters() {
-        document.getElementById('taxonFilter').value = '';
+    document.getElementById('taxonFilter').value = '';
     document.getElementById('expertiseFilter').value = '';
     document.getElementById('subjectFilter').value = '';
     filterTable();
