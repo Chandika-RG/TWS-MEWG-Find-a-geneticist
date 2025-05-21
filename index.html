@@ -1,167 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Find a Geneticist</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    h1 {
-      color: #2a4d69;
-    }
-    .filter-container {
-      margin-bottom: 20px;
-    }
-    .filter-container input {
-      margin-right: 10px;
-      padding: 5px;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: left;
-      vertical-align: top;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-    .highlight {
-      background-color: yellow;
-      font-weight: bold;
-    }
-    .add-yourself {
-      margin-top: 20px;
-    }
-    .add-yourself a {
-      background-color: #2a4d69;
-      color: white;
-      padding: 10px 15px;
-      text-decoration: none;
-      border-radius: 5px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Find a Geneticist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f7f9fa;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        input {
+            padding: 8px;
+            width: 200px;
+        }
+
+        button {
+            padding: 8px 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #eee;
+        }
+
+        .highlight {
+            background-color: yellow;
+        }
+
+        .add-yourself-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
+    <h1>Find a Geneticist</h1>
+    <p style="text-align:center">Welcome! Find a Geneticist or <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank">add yourself to the list</a>.</p>
 
-<h1>Find a Geneticist</h1>
-<p>Use the filters below to find researchers by taxon, subject matter, or data expertise.</p>
+    <div class="filter-container">
+        <input type="text" id="taxonFilter" placeholder="Filter by Taxon">
+        <input type="text" id="expertiseFilter" placeholder="Filter by Expertise">
+        <input type="text" id="subjectFilter" placeholder="Filter by Subject Matter">
+        <button onclick="applyFilters()">Search</button>
+        <button onclick="clearFilters()">Clear</button>
+    </div>
 
-<div class="filter-container">
-  <input type="text" id="taxonFilter" placeholder="Filter by Taxon">
-  <input type="text" id="subjectFilter" placeholder="Filter by Subject matter">
-  <input type="text" id="expertiseFilter" placeholder="Filter by Data expertise">
-</div>
+    <div id="table-container"></div>
 
-<div id="table-container">Loading...</div>
+    <script>
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pub?gid=332580297&single=true&output=csv";
 
-<div class="add-yourself">
-  <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank">Add Yourself</a>
-</div>
+        let allData = [];
 
-<script>
-  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pub?gid=332580297&single=true&output=csv";
-  let allData = [];
+        function fetchData() {
+            Papa.parse(sheetUrl, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    allData = results.data.filter(row => Object.values(row).some(val => val)); // remove empty rows
+                    renderTable(allData);
+                }
+            });
+        }
 
-  function fetchCSVData() {
-    fetch(SHEET_URL)
-      .then(response => response.text())
-      .then(csv => {
-        allData = parseCSV(csv);
-        renderTable(allData);
-      })
-      .catch(err => {
-        document.getElementById("table-container").innerHTML = "<p>Failed to load data.</p>";
-        console.error(err);
-      });
-  }
+        function highlightMatch(text, keyword) {
+            const regex = new RegExp(`(${keyword})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
 
-  function parseCSV(csvText) {
-    const lines = csvText.trim().split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
-    return lines.slice(1).map(line => {
-      const values = line.split(',').map(v => v.trim());
-      const row = {};
-      headers.forEach((header, i) => row[header] = values[i] || '');
-      return row;
-    });
-  }
+        function renderTable(data, keywordInfo = {}) {
+            const container = document.getElementById('table-container');
+            container.innerHTML = '';
 
-  function highlight(text, keyword) {
-    if (!keyword) return text;
-    const regex = new RegExp(`(${keyword})`, 'gi');
-    return text.replace(regex, `<span class="highlight">$1</span>`);
-  }
+            if (!data.length) {
+                container.innerHTML = '<p>No data available.</p>';
+                return;
+            }
 
-  function renderTable(data) {
-    const taxonKeyword = document.getElementById("taxonFilter").value.trim().toLowerCase();
-    const subjectKeyword = document.getElementById("subjectFilter").value.trim().toLowerCase();
-    const expertiseKeyword = document.getElementById("expertiseFilter").value.trim().toLowerCase();
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const headers = Object.keys(data[0]);
 
-    const container = document.getElementById("table-container");
-    if (!data || data.length === 0) {
-      container.innerHTML = "<p>No data available.</p>";
-      return;
-    }
+            const headerRow = document.createElement('tr');
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
 
-    const table = document.createElement("table");
-    const thead = document.createElement("thead");
-    const headerRow = document.createElement("tr");
+            const tbody = document.createElement('tbody');
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    const cellText = row[header] || '';
+                    if (keywordInfo[header]) {
+                        td.innerHTML = highlightMatch(cellText, keywordInfo[header]);
+                    } else {
+                        td.textContent = cellText;
+                    }
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
 
-    Object.keys(data[0]).forEach(key => {
-      const th = document.createElement("th");
-      th.textContent = key;
-      headerRow.appendChild(th);
-    });
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
 
-    const tbody = document.createElement("tbody");
+        function applyFilters() {
+            const taxon = document.getElementById('taxonFilter').value.trim().toLowerCase();
+            const expertise = document.getElementById('expertiseFilter').value.trim().toLowerCase();
+            const subject = document.getElementById('subjectFilter').value.trim().toLowerCase();
 
-    data.forEach(row => {
-      const taxon = row["Taxon"]?.toLowerCase() || '';
-      const subject = row["Subject matter"]?.toLowerCase() || '';
-      const expertise = row["Data expertise"]?.toLowerCase() || '';
+            const keywordInfo = {};
 
-      const matchTaxon = !taxonKeyword || taxon.includes(taxonKeyword);
-      const matchSubject = !subjectKeyword || subject.includes(subjectKeyword);
-      const matchExpertise = !expertiseKeyword || expertise.includes(expertiseKeyword);
+            const filtered = allData.filter(row => {
+                let match = true;
 
-      if (matchTaxon && matchSubject && matchExpertise) {
-        const tr = document.createElement("tr");
-        Object.keys(row).forEach(key => {
-          const td = document.createElement("td");
-          let value = row[key];
+                if (taxon && row["Taxon"]) {
+                    if (!row["Taxon"].toLowerCase().includes(taxon)) match = false;
+                    else keywordInfo["Taxon"] = taxon;
+                }
 
-          if (key === "Taxon") value = highlight(value, taxonKeyword);
-          if (key === "Subject matter") value = highlight(value, subjectKeyword);
-          if (key === "Data expertise") value = highlight(value, expertiseKeyword);
+                if (expertise && row["Data Expertise"]) {
+                    if (!row["Data Expertise"].toLowerCase().includes(expertise)) match = false;
+                    else keywordInfo["Data Expertise"] = expertise;
+                }
 
-          td.innerHTML = value;
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      }
-    });
+                if (subject && row["Subject Matter"]) {
+                    if (!row["Subject Matter"].toLowerCase().includes(subject)) match = false;
+                    else keywordInfo["Subject Matter"] = subject;
+                }
 
-    table.appendChild(tbody);
-    container.innerHTML = '';
-    container.appendChild(table);
-  }
+                return match;
+            });
 
-  // Event listeners for filter inputs
-  ["taxonFilter", "subjectFilter", "expertiseFilter"].forEach(id => {
-    document.getElementById(id).addEventListener("input", () => renderTable(allData));
-  });
+            // Bring matched rows to the top
+            const matchedRows = filtered;
+            const unmatchedRows = allData.filter(x => !matchedRows.includes(x));
+            const finalSorted = [...matchedRows, ...unmatchedRows];
 
-  fetchCSVData();
-  setInterval(fetchCSVData, 86400000); // Refresh every 24 hrs
-</script>
+            renderTable(finalSorted, keywordInfo);
+        }
 
+        function clearFilters() {
+            document.getElementById('taxonFilter').value = '';
+            document.getElementById('expertiseFilter').value = '';
+            document.getElementById('subjectFilter').value = '';
+            renderTable(allData);
+        }
+
+        fetchData();
+        setInterval(fetchData, 10000); // Refresh every 10 seconds
+    </script>
 </body>
 </html>
