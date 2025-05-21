@@ -8,176 +8,158 @@
       font-family: Arial, sans-serif;
       padding: 20px;
     }
+
     h1 {
-      font-size: 2rem;
+      text-align: center;
     }
+
     .filter-container {
-      margin-bottom: 10px;
       display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
     }
-    input {
-      padding: 6px;
-      font-size: 1rem;
+
+    input[type="text"] {
+      width: 300px;
+      padding: 10px;
+      font-size: 16px;
     }
-    button {
-      padding: 6px 12px;
-      font-size: 1rem;
-    }
-    .highlight {
-      background-color: yellow;
-      font-weight: bold;
-    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 1rem;
+      margin-top: 10px;
     }
+
     th, td {
+      padding: 10px;
       border: 1px solid #ccc;
-      padding: 8px;
-      vertical-align: top;
+      text-align: left;
     }
+
     th {
-      background-color: #f9f9f9;
-      font-weight: bold;
+      background-color: #f4f4f4;
     }
-    a.button {
-      display: inline-block;
+
+    .highlight {
+      background-color: yellow;
+    }
+
+    .add-yourself-section {
+      text-align: center;
       margin-top: 20px;
-      background: #007bff;
-      color: #fff;
-      padding: 10px 15px;
-      text-decoration: none;
-      border-radius: 4px;
     }
-    a.button:hover {
-      background: #0056b3;
+
+    .add-yourself-section a {
+      background-color: #007BFF;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 6px;
+    }
+
+    .add-yourself-section a:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
-
   <h1>Find a Geneticist</h1>
-  <p>Welcome! Use the filters below or <a class="button" href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank">Add Yourself</a>.</p>
+  <p style="text-align: center;">Search across taxon, subject matter, or data expertise</p>
 
   <div class="filter-container">
-    <input type="text" id="taxonFilter" placeholder="Filter by Taxon...">
-    <input type="text" id="expertiseFilter" placeholder="Filter by Data Expertise...">
-    <input type="text" id="subjectFilter" placeholder="Filter by Subject Matter...">
-    <button onclick="applyFilters()">Filter</button>
-    <button onclick="clearFilters()">Clear Filters</button>
+    <input type="text" id="keywordInput" placeholder="Search by keyword (e.g., Mammals, SNPs, eDNA)">
   </div>
 
-  <div id="table-container">Loading...</div>
+  <div id="table-container">
+    <p>Loading table...</p>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+  <div class="add-yourself-section">
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank">Add Yourself</a>
+  </div>
+
   <script>
-    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pub?gid=332580297&single=true&output=csv";
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pub?gid=332580297&single=true&output=csv";
     let allData = [];
 
-    function fetchData(force = false) {
-      const lastFetch = localStorage.getItem('lastFetchTime');
-      const now = Date.now();
-
-      if (!force && lastFetch && now - parseInt(lastFetch) < 24 * 60 * 60 * 1000) {
-        const cached = localStorage.getItem('cachedData');
-        if (cached) {
-          allData = JSON.parse(cached);
+    function fetchCSVData() {
+      fetch(SHEET_URL)
+        .then(response => response.text())
+        .then(csv => {
+          allData = parseCSV(csv);
           renderTable(allData);
-          return;
-        }
-      }
+        })
+        .catch(err => {
+          document.getElementById("table-container").innerHTML = "<p>Failed to load data.</p>";
+          console.error(err);
+        });
+    }
 
-      Papa.parse(sheetUrl, {
-        download: true,
-        header: true,
-        complete: function(results) {
-          allData = results.data.filter(row => Object.values(row).some(val => val));
-          localStorage.setItem('cachedData', JSON.stringify(allData));
-          localStorage.setItem('lastFetchTime', Date.now().toString());
-          renderTable(allData);
-        }
+    function parseCSV(csvText) {
+      const lines = csvText.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim());
+        const row = {};
+        headers.forEach((header, i) => row[header] = values[i]);
+        return row;
       });
     }
 
-    function highlight(text, keyword) {
-      if (!keyword) return text;
-      const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+    function highlightKeyword(text, keyword) {
+      const regex = new RegExp(`(${keyword})`, 'gi');
       return text.replace(regex, '<span class="highlight">$1</span>');
     }
 
-    function renderTable(data, highlightFields = {}) {
-      const container = document.getElementById('table-container');
-      container.innerHTML = "";
-
-      if (!data.length) {
-        container.textContent = "No data found.";
+    function renderTable(data, keyword = '') {
+      const container = document.getElementById("table-container");
+      if (!data || data.length === 0) {
+        container.innerHTML = "<p>No data available.</p>";
         return;
       }
 
-      const table = document.createElement('table');
-      const thead = document.createElement('thead');
-      const headers = Object.keys(data[0]);
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
 
-      const headerRow = document.createElement('tr');
-      headers.forEach(h => {
-        const th = document.createElement('th');
-        th.textContent = h;
+      Object.keys(data[0]).forEach(key => {
+        const th = document.createElement("th");
+        th.textContent = key;
         headerRow.appendChild(th);
       });
       thead.appendChild(headerRow);
       table.appendChild(thead);
 
-      const tbody = document.createElement('tbody');
+      const tbody = document.createElement("tbody");
       data.forEach(row => {
-        const tr = document.createElement('tr');
-        headers.forEach(h => {
-          const td = document.createElement('td');
-          const cell = row[h] || "";
-          td.innerHTML = highlightFields[h] ? highlight(cell, highlightFields[h]) : cell;
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
+        const rowText = Object.values(row).join(' ').toLowerCase();
+        if (!keyword || rowText.includes(keyword.toLowerCase())) {
+          const tr = document.createElement("tr");
+          Object.values(row).forEach(value => {
+            const td = document.createElement("td");
+            td.innerHTML = keyword ? highlightKeyword(value, keyword) : value;
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        }
       });
 
       table.appendChild(tbody);
+      container.innerHTML = '';
       container.appendChild(table);
     }
 
-    function applyFilters() {
-      const taxon = document.getElementById("taxonFilter").value.toLowerCase().trim();
-      const expertise = document.getElementById("expertiseFilter").value.toLowerCase().trim();
-      const subject = document.getElementById("subjectFilter").value.toLowerCase().trim();
+    document.getElementById("keywordInput").addEventListener("input", e => {
+      const keyword = e.target.value.trim();
+      renderTable(allData, keyword);
+    });
 
-      const matches = row => {
-        const matchField = (val, term) => val && val.toLowerCase().split(',').some(w => w.trim().includes(term));
-        return (!taxon || matchField(row["Taxon"], taxon)) &&
-               (!expertise || matchField(row["Data Expertise"], expertise)) &&
-               (!subject || matchField(row["Subject Matter"], subject));
-      };
+    // Fetch data on load
+    fetchCSVData();
 
-      const matched = allData.filter(matches);
-      const unmatched = allData.filter(row => !matched.includes(row));
-
-      const highlights = {};
-      if (taxon) highlights["Taxon"] = taxon;
-      if (expertise) highlights["Data Expertise"] = expertise;
-      if (subject) highlights["Subject Matter"] = subject;
-
-      renderTable([...matched, ...unmatched], highlights);
-    }
-
-    function clearFilters() {
-      document.getElementById("taxonFilter").value = "";
-      document.getElementById("expertiseFilter").value = "";
-      document.getElementById("subjectFilter").value = "";
-      renderTable(allData);
-    }
-
-    fetchData(true); // Force first-time fetch
+    // Refresh data every 24 hours (86,400,000 milliseconds)
+    setInterval(fetchCSVData, 86400000);
   </script>
-
 </body>
 </html>
