@@ -1,88 +1,193 @@
-<script>
-    function renderTable(data, highlight = {}) {
-        const container = document.getElementById('table-container');
-        container.innerHTML = '';
-
-        if (data.length === 0) {
-            container.innerHTML = '<p>No data to display.</p>';
-            return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Find a Geneticist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f7f9fa;
         }
 
-        const table = document.createElement('table');
-        table.classList.add('data-table');
+        h1 {
+            text-align: center;
+        }
 
-        const thead = document.createElement('thead');
-        const tbody = document.createElement('tbody');
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
 
-        const keys = Object.keys(data[0]);
+        input {
+            padding: 8px;
+            width: 200px;
+        }
 
-        const headerRow = document.createElement('tr');
-        keys.forEach(key => {
-            const th = document.createElement('th');
-            th.textContent = key;
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
+        button {
+            padding: 8px 12px;
+        }
 
-        data.forEach(row => {
-            const tr = document.createElement('tr');
-            keys.forEach(key => {
-                const td = document.createElement('td');
-                const value = row[key] || "";
-                if (highlight[key]) {
-                    const regex = new RegExp(`\\b(${highlight[key]})\\b`, 'gi');
-                    td.innerHTML = value.replace(regex, '<span style="background-color: yellow;">$1</span>');
-                } else {
-                    td.textContent = value;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #eee;
+        }
+
+        .highlight {
+            background-color: yellow;
+        }
+
+        .add-yourself-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+    <h1>Find a Geneticist</h1>
+    <p style="text-align:center">Welcome! Find a Geneticist or <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank">add yourself to the list</a>.</p>
+
+    <div class="filter-container">
+        <input type="text" id="taxonFilter" placeholder="Filter by Taxon">
+        <input type="text" id="expertiseFilter" placeholder="Filter by Expertise">
+        <input type="text" id="subjectFilter" placeholder="Filter by Subject Matter">
+        <button onclick="applyFilters()">Search</button>
+        <button onclick="clearFilters()">Clear</button>
+    </div>
+
+    <div id="table-container"></div>
+
+    <script>
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pub?gid=332580297&single=true&output=csv";
+
+        let allData = [];
+
+        function fetchData() {
+            Papa.parse(sheetUrl, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    allData = results.data.filter(row => Object.values(row).some(val => val)); // remove empty rows
+                    renderTable(allData);
                 }
-                tr.appendChild(td);
             });
-            tbody.appendChild(tr);
-        });
+        }
 
-        table.appendChild(thead);
-        table.appendChild(tbody);
-        container.appendChild(table);
-    }
+        function highlightMatch(text, keyword) {
+            const regex = new RegExp(`(${keyword})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
 
-    function filterTable() {
-        const taxonInput = document.getElementById('taxonFilter').value.trim().toLowerCase();
-        const expertiseInput = document.getElementById('expertiseFilter').value.trim().toLowerCase();
-        const subjectInput = document.getElementById('subjectFilter').value.trim().toLowerCase();
+        function renderTable(data, keywordInfo = {}) {
+            const container = document.getElementById('table-container');
+            container.innerHTML = '';
 
-        const highlightTerms = {
-            "Species": taxonInput,
-            "Methods": expertiseInput,
-            "Area of Expertise": subjectInput
-        };
+            if (!data.length) {
+                container.innerHTML = '<p>No data available.</p>';
+                return;
+            }
 
-        // Match and rank rows with exact word matches first
-        const matchedRows = fullData
-            .map(row => {
-                let score = 0;
-                const rowLower = Object.fromEntries(Object.entries(row).map(([k, v]) => [k, (v || "").toLowerCase()]));
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const headers = Object.keys(data[0]);
 
-                if (taxonInput && rowLower["Species"]?.split(/[,;]/).map(w => w.trim()).includes(taxonInput)) score += 1;
-                if (expertiseInput && rowLower["Methods"]?.split(/[,;]/).map(w => w.trim()).includes(expertiseInput)) score += 1;
-                if (subjectInput && rowLower["Area of Expertise"]?.split(/[,;]/).map(w => w.trim()).includes(subjectInput)) score += 1;
+            const headerRow = document.createElement('tr');
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
 
-                // if it still contains search terms even as substring
-                if (score === 0 &&
-                    (
-                        rowLower["Species"]?.includes(taxonInput) ||
-                        rowLower["Methods"]?.includes(expertiseInput) ||
-                        rowLower["Area of Expertise"]?.includes(subjectInput)
-                    )
-                ) {
-                    score += 0.5;
+            const tbody = document.createElement('tbody');
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    const cellText = row[header] || '';
+                    if (keywordInfo[header]) {
+                        td.innerHTML = highlightMatch(cellText, keywordInfo[header]);
+                    } else {
+                        td.textContent = cellText;
+                    }
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
+
+        function applyFilters() {
+            const taxon = document.getElementById('taxonFilter').value.trim().toLowerCase();
+            const expertise = document.getElementById('expertiseFilter').value.trim().toLowerCase();
+            const subject = document.getElementById('subjectFilter').value.trim().toLowerCase();
+
+            const keywordInfo = {};
+
+            const filtered = allData.filter(row => {
+                let match = true;
+
+                if (taxon && row["Taxon"]) {
+                    if (!row["Taxon"].toLowerCase().includes(taxon)) match = false;
+                    else keywordInfo["Taxon"] = taxon;
                 }
 
-                return { row, score };
-            })
-            .filter(entry => entry.score > 0)
-            .sort((a, b) => b.score - a.score)
-            .map(entry => entry.row);
+                if (expertise && row["Data Expertise"]) {
+                    if (!row["Data Expertise"].toLowerCase().includes(expertise)) match = false;
+                    else keywordInfo["Data Expertise"] = expertise;
+                }
 
-        renderTable(matchedRows, highlightTerms);
-    }
-</script>
+                if (subject && row["Subject Matter"]) {
+                    if (!row["Subject Matter"].toLowerCase().includes(subject)) match = false;
+                    else keywordInfo["Subject Matter"] = subject;
+                }
+
+                return match;
+            });
+
+            // Bring matched rows to the top
+            const matchedRows = filtered;
+            const unmatchedRows = allData.filter(x => !matchedRows.includes(x));
+            const finalSorted = [...matchedRows, ...unmatchedRows];
+
+            renderTable(finalSorted, keywordInfo);
+        }
+
+        function clearFilters() {
+            document.getElementById('taxonFilter').value = '';
+            document.getElementById('expertiseFilter').value = '';
+            document.getElementById('subjectFilter').value = '';
+            renderTable(allData);
+        }
+
+        fetchData();
+        setInterval(fetchData, 10000); // Refresh every 10 seconds
+    </script>
+</body>
+</html>
