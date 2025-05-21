@@ -19,10 +19,9 @@
         /* Container for logo + title, center horizontally */
         .header-container {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
             margin-bottom: 20px;
-            gap: 20px;
         }
 
         /* Shrink Website column width */
@@ -97,11 +96,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
-    <div class="header-container" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-        <img src="logo.png" alt="TWS Molecular Ecology Logo" style="height: 200px; margin-bottom: 10px;" />
+    <div class="header-container">
+        <a href="https://www.twsmewg.com/" target="_blank" rel="noopener noreferrer" style="display: inline-block;">
+            <img src="logo.png" alt="TWS Molecular Ecology Logo" style="height: 200px; margin-bottom: 10px;" />
+        </a>
         <h1 style="margin: 0; text-align: center;">Find a Geneticist</h1>
     </div>
-
 
     <p style="text-align:center">
         Welcome! Find a Geneticist or
