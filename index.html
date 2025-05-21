@@ -3,7 +3,7 @@
 <head>
     <title>Find a Geneticist</title>
     <link rel="stylesheet" type="text/css" href="style.css">
-     <style>
+    <style>
          .filter-container {
              margin-bottom: 10px;
              display: flex;
@@ -12,7 +12,7 @@
          .highlight {
              background-color: yellow;
          }
-     </style>
+    </style>
 </head>
 <body>
     <header>
@@ -20,20 +20,18 @@
         <p>Welcome! Find a Geneticist or add yourself to the list.</p>
     </header>
     <main>
-        <iframe id="dataSheet" src="<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pubhtml?gid=332580297&amp;single=true&amp;widget=true&amp;headers=false"></iframe>" width="800" height="400"></iframe>
 
       <div class="filter-container">
             <input type="text" id="taxonFilter" placeholder="Filter by Taxon...">
             <input type="text" id="expertiseFilter" placeholder="Filter by Data Expertise...">
-            <input type="textIdo/subjectFilter" placeholder="Filter by Subject Matter...">
+            <input type="text" id="subjectFilter" placeholder="Filter by Subject Matter...">
         </div>
     <div class="filter-container">
             <button onclick="filterTable()">Filter</button>
             <button onclick="clearFilters()">Clear Filters</button>
     </div>
        <div id="searchResults"></div>
-
-
+      <div id="table-container"></div>
         <div class="add-yourself-section">
             <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" class="button" target="_blank">Add Yourself</a>
         </div>
@@ -43,33 +41,81 @@
     </footer>
 
 <script>
-function filterTable() {
-    const taxonFilter = document.getElementById('taxonFilter').value.toLowerCase();
-    const expertiseFilter = document.getElementById('expertiseFilter').value.toLowerCase();
-    const subjectFilter = document.getElementById('subjectFilter').value.toLowerCase();
-    const iframe = document.getElementById('dataSheet');
-    const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
-    const table = iframeDocument.querySelector('table');
-    const searchResultsDiv = document.getElementById('searchResults');
+  const googleSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pub?gid=332580297&single=true&output=csv";
+     let data = [];
+    function fetchData(){
+        fetch(googleSheetUrl)
+            .then(response => response.text())
+            .then(csvData => {
+              data = parseCSV(csvData);
+              renderTable(data);
+              filterTable();
+            })
+            .catch(error => {
+              console.error("Error fetching data:", error);
+                document.getElementById('table-container').innerHTML = '<p>Error loading table data</p>';
+            });
+    }
+ function renderTable(data) {
+     const tableContainer = document.getElementById('table-container');
+      if (data.length == 0){
+           tableContainer.innerHTML = '<p>No data to display</p>';
+         return;
+      }
+
+        const table = document.createElement('table');
+        table.classList.add('data-table');
+
+        const headerRow = document.createElement('tr');
+        for(const key in data[0]){
+          const headerCell = document.createElement('th');
+          headerCell.textContent = key;
+          headerRow.appendChild(headerCell);
+        }
+        table.appendChild(headerRow);
+
+        const tbody = document.createElement('tbody');
+
+        data.forEach(item => {
+            const row = document.createElement('tr');
+           for(const key in item){
+             const cell = document.createElement('td');
+             cell.textContent = item[key];
+             row.appendChild(cell);
+           }
+          tbody.appendChild(row);
+      });
+    table.appendChild(tbody);
+        tableContainer.innerHTML = '';
+        tableContainer.appendChild(table);
+
+    }
+    function filterTable() {
+        const taxonFilter = document.getElementById('taxonFilter').value.toLowerCase();
+        const expertiseFilter = document.getElementById('expertiseFilter').value.toLowerCase();
+        const subjectFilter = document.getElementById('subjectFilter').value.toLowerCase();
+       const table = document.querySelector('#table-container table');
+        const searchResultsDiv = document.getElementById('searchResults');
 
 
     if(!table){
          searchResultsDiv.innerHTML = '<p>Unable to find the table to perform a search.</p>';
         return;
     }
-    searchResultsDiv.innerHTML = '';
+        searchResultsDiv.innerHTML = '';
+
     const rows = table.querySelectorAll('tbody tr');
 
     let resultsFound = false;
-    const resultsTable = document.createElement('table');
-    resultsTable.innerHTML = "<thead><tr><th>Name</th><th>Institution</th><th>Contact</th><th>Area of Expertise</th><th>Species</th><th>Methods</th><th>Keywords</th><th>Resources</th><th>Notes</th></tr></thead>";
-    const resultsBody = document.createElement('tbody');
+     const resultsTable = document.createElement('table');
+        resultsTable.innerHTML = "<thead><tr><th>Name</th><th>Institution</th><th>Contact</th><th>Area of Expertise</th><th>Species</th><th>Methods</th><th>Keywords</th><th>Resources</th><th>Notes</th></tr></thead>";
+        const resultsBody = document.createElement('tbody');
 
-    rows.forEach(row => {
+        rows.forEach(row => {
         const cells = row.querySelectorAll('td');
       let match = true;
        if(taxonFilter){
-        const taxonCell = cells ? cells[6] : null;
+        const taxonCell = cells ? cells : null;
          if(taxonCell){
             const words = taxonCell.textContent.toLowerCase().split(',').map(word => word.trim());
           if(!words.some(word => word.includes(taxonFilter))){
@@ -80,7 +126,7 @@ function filterTable() {
           }
        }
         if(expertiseFilter){
-            const expertiseCell = cells ? cells[7] : null;
+            const expertiseCell = cells ? cells : null;
              if(expertiseCell){
                const words = expertiseCell.textContent.toLowerCase().split(',').map(word => word.trim());
               if(!words.some(word => word.includes(expertiseFilter))){
@@ -91,7 +137,7 @@ function filterTable() {
           }
        }
          if(subjectFilter){
-          const subjectCell = cells ? cells[8] : null;
+          const subjectCell = cells ? cells : null;
            if(subjectCell){
             const words = subjectCell.textContent.toLowerCase().split(',').map(word => word.trim());
             if(!words.some(word => word.includes(subjectFilter))){
@@ -102,25 +148,47 @@ function filterTable() {
           }
        }
     if(match){
-        resultsBody.appendChild(row.cloneNode(true));
+          resultsBody.appendChild(row.cloneNode(true));
         resultsFound = true;
     }
 
-    });
+        });
 
     if (resultsFound) {
-        resultsTable.appendChild(resultsBody);
+      resultsTable.appendChild(resultsBody);
         searchResultsDiv.appendChild(resultsTable);
     } else {
       searchResultsDiv.innerHTML = '<p>No matching rows found.</p>';
     }
 }
+
 function clearFilters() {
     document.getElementById('taxonFilter').value = '';
     document.getElementById('expertiseFilter').value = '';
     document.getElementById('subjectFilter').value = '';
     filterTable();
 }
+ function parseCSV(csvText) {
+        const rows = csvText.trim().split('\n');
+        if (rows.length < 1) return [];
+
+        const headers = rows[0].split(',').map(header => header.trim());
+        const parsedData = [];
+
+        for (let i = 1; i < rows.length; i++) {
+            const values = rows[i].split(',').map(value => value.trim());
+            const rowData = {};
+            for (let j = 0; j < headers.length; j++) {
+                rowData[headers[j]] = values[j];
+            }
+            parsedData.push(rowData);
+        }
+        return parsedData;
+    }
+
+
+    fetchData();
+ setInterval(fetchData, 10000);
 </script>
 </body>
 </html>
