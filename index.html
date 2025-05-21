@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8" />
     <title>Find a Geneticist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 20px;
-            background: #ffffff;
+            background: #f5f5f5;
             color: #333;
         }
 
         h1 {
             margin: 0;
             text-align: center;
-            font-size: 2em;
-            color: #2c3e50;
         }
 
         .header-container {
@@ -28,14 +27,16 @@
         .header-container img {
             height: 200px;
             margin-bottom: 10px;
-            cursor: pointer;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background: #f9f9f9;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
         }
 
         th, td {
@@ -45,32 +46,46 @@
         }
 
         th {
-            background-color: #e8e8e8;
+            background-color: #2e7d32;
+            color: white;
         }
 
         th.website-col, td.website-col {
-            width: 140px;
+            width: 120px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         td.website-col a {
-            color: #1a0dab;
+            color: #1b5e20;
             text-decoration: none;
-            word-break: break-word;
         }
 
         td.website-col a:hover {
             text-decoration: underline;
         }
 
+        .filter-box {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+        }
+
         .filter-container {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
             gap: 10px;
-            margin-bottom: 10px;
+            justify-content: center;
+        }
+
+        .filter-container label {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.9em;
         }
 
         input {
@@ -82,7 +97,7 @@
 
         button {
             padding: 8px 12px;
-            background-color: #2c3e50;
+            background-color: #2e7d32;
             color: white;
             border: none;
             border-radius: 4px;
@@ -90,7 +105,7 @@
         }
 
         button:hover {
-            background-color: #1a242f;
+            background-color: #27642b;
         }
 
         .highlight {
@@ -111,46 +126,70 @@
             border-radius: 4px;
         }
 
-        .button:hover {
-            background-color: #3367d6;
+        footer {
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 40px;
+            color: #666;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
-
     <div class="header-container">
         <a href="https://www.twsmewg.com/" target="_blank" rel="noopener noreferrer">
-            <img src="logo.png" alt="TWS Molecular Ecology Logo" />
+            <img src="logo.png" alt="TWS Molecular Ecology Logo">
         </a>
         <h1>Find a Geneticist</h1>
     </div>
 
-    <p style="text-align:center">
-        Welcome! Find a Geneticist or
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer">add yourself to the list</a>.
+    <p style="text-align:center; max-width: 700px; margin: auto; font-size: 1.1em;">
+        This directory helps connect researchers, managers, and students to professionals applying genetic tools to the conservation and management of wildlife.
     </p>
 
-    <div class="filter-container">
-        <input type="text" id="taxonFilter" placeholder="Filter by Taxon" />
-        <input type="text" id="subjectFilter" placeholder="Filter by Subject Matter" />
-        <input type="text" id="expertiseFilter" placeholder="Filter by Expertise" />
-        <button onclick="applyFilters()">Search</button>
-        <button onclick="clearFilters()">Clear</button>
+    <div class="add-yourself-section">
+        <p>
+            Want to be listed?
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer" class="button">
+                Add yourself to the list
+            </a>
+        </p>
+    </div>
+
+    <div class="filter-box">
+        <h3 style="margin-top: 0;">Search by Expertise</h3>
+        <div class="filter-container">
+            <label>Taxon:
+                <input type="text" id="taxonFilter" placeholder="e.g., Mammals">
+            </label>
+            <label>Subject:
+                <input type="text" id="subjectFilter" placeholder="e.g., Phylogeography">
+            </label>
+            <label>Expertise:
+                <input type="text" id="expertiseFilter" placeholder="e.g., RADseq">
+            </label>
+            <button onclick="applyFilters()">Search</button>
+            <button onclick="clearFilters()">Clear</button>
+        </div>
     </div>
 
     <div id="table-container"></div>
 
+    <footer>
+        <p>
+            Maintained by Chandika RG, <strong>TWS Molecular Ecology Working Group Member</strong>.<br />
+            Questions? Email us at <a href="mailto:twsmewg@gmail.com">twsmewg@gmail.com</a>
+        </p>
+    </footer>
+
     <script>
-        const baseSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pub?gid=332580297&single=true&output=csv";
+        const sheetUrl =
+            "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pub?gid=332580297&single=true&output=csv";
 
         let allData = [];
 
         function fetchData() {
-            const timestamp = new Date().getTime();
-            const sheetUrlWithTimestamp = `${baseSheetUrl}&cacheBust=${timestamp}`;
-
-            Papa.parse(sheetUrlWithTimestamp, {
+            Papa.parse(sheetUrl, {
                 download: true,
                 header: true,
                 complete: function (results) {
@@ -207,12 +246,10 @@
 
                     if (header.toLowerCase().includes("website") && cellText) {
                         td.classList.add("website-col");
-
                         let url = cellText.trim();
                         if (!/^https?:\/\//i.test(url)) {
                             url = "https://" + url;
                         }
-
                         td.innerHTML = `<a href="${url}" target="_blank" rel="noopener noreferrer">${cellText}</a>`;
                     }
 
@@ -268,7 +305,7 @@
         }
 
         fetchData();
-        setInterval(fetchData, 100000); // Refresh every 100 seconds
+        setInterval(fetchData, 100000);
     </script>
 </body>
 </html>
