@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8" />
     <title>Find a Geneticist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 20px;
-            background: #ffffff;
+            background: #f5f5f5;
+            color: #333;
         }
 
         h1 {
             margin: 0;
             text-align: center;
-            flex: 1;
         }
 
-        /* Container for logo + title, center horizontally */
         .header-container {
             display: flex;
             flex-direction: column;
@@ -24,11 +24,19 @@
             margin-bottom: 20px;
         }
 
-        /* Shrink Website column width */
+        .header-container img {
+            height: 200px;
+            margin-bottom: 10px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
         }
 
         th, td {
@@ -38,10 +46,10 @@
         }
 
         th {
-            background-color: #eee;
+            background-color: #2e7d32;
+            color: white;
         }
 
-        /* Shrink Website column and center text */
         th.website-col, td.website-col {
             width: 120px;
             white-space: nowrap;
@@ -49,30 +57,55 @@
             text-overflow: ellipsis;
         }
 
-        /* Make website cell links */
         td.website-col a {
-            color: #1a0dab;
+            color: #1b5e20;
             text-decoration: none;
-            word-break: break-word;
         }
+
         td.website-col a:hover {
             text-decoration: underline;
         }
 
+        .filter-box {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+        }
+
         .filter-container {
             display: flex;
-            justify-content: center;
+            flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 10px;
+            justify-content: center;
+        }
+
+        .filter-container label {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.9em;
         }
 
         input {
             padding: 8px;
             width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
 
         button {
             padding: 8px 12px;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #27642b;
         }
 
         .highlight {
@@ -92,31 +125,62 @@
             text-decoration: none;
             border-radius: 4px;
         }
+
+        footer {
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 40px;
+            color: #666;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
     <div class="header-container">
-        <a href="https://www.twsmewg.com/" target="_blank" rel="noopener noreferrer" style="display: inline-block;">
-            <img src="logo.png" alt="TWS Molecular Ecology Logo" style="height: 200px; margin-bottom: 10px;" />
+        <a href="https://www.twsmewg.com/" target="_blank" rel="noopener noreferrer">
+            <img src="logo.png" alt="TWS Molecular Ecology Logo">
         </a>
-        <h1 style="margin: 0; text-align: center;">Find a Geneticist</h1>
+        <h1>Find a Geneticist</h1>
     </div>
 
-    <p style="text-align:center">
-        Welcome! Find a Geneticist or
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer">add yourself to the list</a>.
+    <p style="text-align:center; max-width: 700px; margin: auto; font-size: 1.1em;">
+        This directory helps connect researchers, managers, and students to professionals applying genetic tools to the conservation and management of wildlife.
     </p>
 
-    <div class="filter-container">
-        <input type="text" id="taxonFilter" placeholder="Filter by Taxon" />
-        <input type="text" id="subjectFilter" placeholder="Filter by Subject Matter" />
-        <input type="text" id="expertiseFilter" placeholder="Filter by Expertise" />
-        <button onclick="applyFilters()">Search</button>
-        <button onclick="clearFilters()">Clear</button>
+    <div class="add-yourself-section">
+        <p>
+            Want to be listed?
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer">
+                Add yourself to the list
+            </a>.
+        </p>
+    </div>
+
+    <div class="filter-box">
+        <h3 style="margin-top: 0;">Search by Expertise</h3>
+        <div class="filter-container">
+            <label>Taxon:
+                <input type="text" id="taxonFilter" placeholder="e.g., Mammals">
+            </label>
+            <label>Subject:
+                <input type="text" id="subjectFilter" placeholder="e.g., Phylogeography">
+            </label>
+            <label>Expertise:
+                <input type="text" id="expertiseFilter" placeholder="e.g., RADseq">
+            </label>
+            <button onclick="applyFilters()">Search</button>
+            <button onclick="clearFilters()">Clear</button>
+        </div>
     </div>
 
     <div id="table-container"></div>
+
+    <footer>
+        <p>
+            Maintained by the <strong>TWS Molecular Ecology Working Group</strong>.<br />
+            Questions? Email us at <a href="mailto:twsmewg@gmail.com">twsmewg@gmail.com</a>
+        </p>
+    </footer>
 
     <script>
         const sheetUrl =
@@ -131,7 +195,7 @@
                 complete: function (results) {
                     allData = results.data.filter((row) =>
                         Object.values(row).some((val) => val)
-                    ); // remove empty rows
+                    );
                     renderTable(allData);
                 },
             });
@@ -159,8 +223,6 @@
             headers.forEach((header) => {
                 const th = document.createElement("th");
                 th.textContent = header;
-
-                // Add class to Website column header to shrink width
                 if (header.toLowerCase().includes("website")) {
                     th.classList.add("website-col");
                 }
@@ -182,17 +244,12 @@
                         td.textContent = cellText;
                     }
 
-                    // For Website column, turn text into clickable link
                     if (header.toLowerCase().includes("website") && cellText) {
-                        // Add class for styling
                         td.classList.add("website-col");
-
-                        // Ensure the URL starts with http/https
                         let url = cellText.trim();
                         if (!/^https?:\/\//i.test(url)) {
                             url = "https://" + url;
                         }
-
                         td.innerHTML = `<a href="${url}" target="_blank" rel="noopener noreferrer">${cellText}</a>`;
                     }
 
@@ -233,7 +290,6 @@
                 return match;
             });
 
-            // Bring matched rows to the top
             const matchedRows = filtered;
             const unmatchedRows = allData.filter((x) => !matchedRows.includes(x));
             const finalSorted = [...matchedRows, ...unmatchedRows];
@@ -249,7 +305,7 @@
         }
 
         fetchData();
-        setInterval(fetchData, 100000); // Refresh every 100 seconds
+        setInterval(fetchData, 100000);
     </script>
 </body>
 </html>
