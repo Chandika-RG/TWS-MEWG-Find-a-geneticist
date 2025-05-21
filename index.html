@@ -82,38 +82,47 @@
 
     <script>
         const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pub?gid=332580297&single=true&output=csv";
-
+    
         let allData = [];
-
-        function fetchData() {
+    
+        function fetchData(force = false) {
+            const lastFetch = localStorage.getItem('lastFetchTime');
+            const now = Date.now();
+    
+            if (!force && lastFetch && now - parseInt(lastFetch) < 24 * 60 * 60 * 1000) {
+                console.log("Data was fetched less than 24 hours ago. Skipping update.");
+                return;
+            }
+    
             Papa.parse(sheetUrl, {
                 download: true,
                 header: true,
                 complete: function(results) {
                     allData = results.data.filter(row => Object.values(row).some(val => val)); // remove empty rows
                     renderTable(allData);
+                    localStorage.setItem('lastFetchTime', Date.now().toString());
                 }
             });
         }
-
+    
         function highlightMatch(text, keyword) {
             const regex = new RegExp(`(${keyword})`, 'gi');
             return text.replace(regex, '<span class="highlight">$1</span>');
         }
-
+    
         function renderTable(data, keywordInfo = {}) {
             const container = document.getElementById('table-container');
             container.innerHTML = '';
-
+    
             if (!data.length) {
                 container.innerHTML = '<p>No data available.</p>';
                 return;
             }
-
+    
             const table = document.createElement('table');
             const thead = document.createElement('thead');
             const headers = Object.keys(data[0]);
-
+    
             const headerRow = document.createElement('tr');
             headers.forEach(header => {
                 const th = document.createElement('th');
@@ -122,7 +131,7 @@
             });
             thead.appendChild(headerRow);
             table.appendChild(thead);
-
+    
             const tbody = document.createElement('tbody');
             data.forEach(row => {
                 const tr = document.createElement('tr');
@@ -138,56 +147,56 @@
                 });
                 tbody.appendChild(tr);
             });
-
+    
             table.appendChild(tbody);
             container.appendChild(table);
         }
-
+    
         function applyFilters() {
             const taxon = document.getElementById('taxonFilter').value.trim().toLowerCase();
             const expertise = document.getElementById('expertiseFilter').value.trim().toLowerCase();
             const subject = document.getElementById('subjectFilter').value.trim().toLowerCase();
-
+    
             const keywordInfo = {};
-
+    
             const filtered = allData.filter(row => {
                 let match = true;
-
+    
                 if (taxon && row["Taxon"]) {
                     if (!row["Taxon"].toLowerCase().includes(taxon)) match = false;
                     else keywordInfo["Taxon"] = taxon;
                 }
-
+    
                 if (expertise && row["Data Expertise"]) {
                     if (!row["Data Expertise"].toLowerCase().includes(expertise)) match = false;
                     else keywordInfo["Data Expertise"] = expertise;
                 }
-
+    
                 if (subject && row["Subject Matter"]) {
                     if (!row["Subject Matter"].toLowerCase().includes(subject)) match = false;
                     else keywordInfo["Subject Matter"] = subject;
                 }
-
+    
                 return match;
             });
-
-            // Bring matched rows to the top
+    
             const matchedRows = filtered;
             const unmatchedRows = allData.filter(x => !matchedRows.includes(x));
             const finalSorted = [...matchedRows, ...unmatchedRows];
-
+    
             renderTable(finalSorted, keywordInfo);
         }
-
+    
         function clearFilters() {
             document.getElementById('taxonFilter').value = '';
             document.getElementById('expertiseFilter').value = '';
             document.getElementById('subjectFilter').value = '';
             renderTable(allData);
         }
-
+    
+        // Initial fetch (conditionally)
         fetchData();
-        setInterval(fetchData, 10000); // Refresh every 10 seconds
     </script>
+
 </body>
 </html>
