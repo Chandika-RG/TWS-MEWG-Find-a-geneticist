@@ -82,7 +82,6 @@
 
     <script>
         const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pub?gid=332580297&single=true&output=csv";
-    
         let allData = [];
     
         function fetchData(force = false) {
@@ -106,7 +105,7 @@
         }
     
         function highlightMatch(text, keyword) {
-            const regex = new RegExp(`(${keyword})`, 'gi');
+            const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
             return text.replace(regex, '<span class="highlight">$1</span>');
         }
     
@@ -159,32 +158,37 @@
     
             const keywordInfo = {};
     
-            const filtered = allData.filter(row => {
+            function matchesField(fieldValue, keyword) {
+                if (!fieldValue || !keyword) return false;
+                const words = fieldValue.toLowerCase().split(',').map(w => w.trim());
+                return words.some(word => word.includes(keyword));
+            }
+    
+            const matched = allData.filter(row => {
                 let match = true;
     
-                if (taxon && row["Taxon"]) {
-                    if (!row["Taxon"].toLowerCase().includes(taxon)) match = false;
+                if (taxon) {
+                    if (!matchesField(row["Taxon"], taxon)) match = false;
                     else keywordInfo["Taxon"] = taxon;
                 }
     
-                if (expertise && row["Data Expertise"]) {
-                    if (!row["Data Expertise"].toLowerCase().includes(expertise)) match = false;
+                if (expertise) {
+                    if (!matchesField(row["Data Expertise"], expertise)) match = false;
                     else keywordInfo["Data Expertise"] = expertise;
                 }
     
-                if (subject && row["Subject Matter"]) {
-                    if (!row["Subject Matter"].toLowerCase().includes(subject)) match = false;
+                if (subject) {
+                    if (!matchesField(row["Subject Matter"], subject)) match = false;
                     else keywordInfo["Subject Matter"] = subject;
                 }
     
                 return match;
             });
     
-            const matchedRows = filtered;
-            const unmatchedRows = allData.filter(x => !matchedRows.includes(x));
-            const finalSorted = [...matchedRows, ...unmatchedRows];
+            const unmatched = allData.filter(row => !matched.includes(row));
+            const final = [...matched, ...unmatched];
     
-            renderTable(finalSorted, keywordInfo);
+            renderTable(final, keywordInfo);
         }
     
         function clearFilters() {
@@ -194,7 +198,7 @@
             renderTable(allData);
         }
     
-        // Initial fetch (conditionally)
+        // Initial fetch
         fetchData();
     </script>
 
