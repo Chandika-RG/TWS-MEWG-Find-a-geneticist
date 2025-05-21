@@ -72,8 +72,8 @@
 
     <div class="filter-container">
         <input type="text" id="taxonFilter" placeholder="Filter by Taxon">
-        <input type="text" id="expertiseFilter" placeholder="Filter by Expertise">
         <input type="text" id="subjectFilter" placeholder="Filter by Subject Matter">
+        <input type="text" id="expertiseFilter" placeholder="Filter by Expertise">
         <button onclick="applyFilters()">Search</button>
         <button onclick="clearFilters()">Clear</button>
     </div>
@@ -145,8 +145,9 @@
 
         function applyFilters() {
             const taxon = document.getElementById('taxonFilter').value.trim().toLowerCase();
-            const expertise = document.getElementById('expertiseFilter').value.trim().toLowerCase();
             const subject = document.getElementById('subjectFilter').value.trim().toLowerCase();
+            const expertise = document.getElementById('expertiseFilter').value.trim().toLowerCase();
+            
 
             const keywordInfo = {};
 
@@ -158,14 +159,15 @@
                     else keywordInfo["Taxon"] = taxon;
                 }
 
-                if (expertise && row["Data Expertise"]) {
-                    if (!row["Data Expertise"].toLowerCase().includes(expertise)) match = false;
-                    else keywordInfo["Data Expertise"] = expertise;
+                if (subject && row["Subject matter"]) {
+                    if (!row["Subject matter"].toLowerCase().includes(subject)) match = false;
+                    else keywordInfo["Subject matter"] = subject;
                 }
 
-                if (subject && row["Subject Matter"]) {
-                    if (!row["Subject Matter"].toLowerCase().includes(subject)) match = false;
-                    else keywordInfo["Subject Matter"] = subject;
+                if (expertise && row["Data expertise"]) {
+                    if (!row["Data expertise"].toLowerCase().includes(expertise)) match = false;
+                    else keywordInfo["Data expertise"] = expertise;
+                
                 }
 
                 return match;
@@ -181,13 +183,13 @@
 
         function clearFilters() {
             document.getElementById('taxonFilter').value = '';
-            document.getElementById('expertiseFilter').value = '';
             document.getElementById('subjectFilter').value = '';
+            document.getElementById('expertiseFilter').value = '';
             renderTable(allData);
         }
 
         fetchData();
-        setInterval(fetchData, 10000); // Refresh every 10 seconds
+        setInterval(fetchData, 100000); // Refresh every 100 seconds
     </script>
 </body>
 </html>
