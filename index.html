@@ -3,17 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TWS MEWG: Find a Geneticist</title>
+  <title>Find a Geneticist</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- ==== logo/header ==== -->
+  <header>
+    <!-- update the src to wherever your logo lives in the repo -->
+    <img src="assets/logo.png" alt="TWS MEWG Logo" class="logo" />
+  </header>
+
   <div class="container">
     <aside class="sidebar">
       <h2>Quick Links</h2>
       <ul>
-        <li><a href="#" onclick="alert('Sort & Filter coming soon!')">Sort/Filter</a></li>
+        <li><a href="#" onclick="alert('Sorting coming soon!')">Sort/Filter</a></li>
         <li>
-          <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank">
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link"
+             target="_blank">
             <button>Add Yourself to the Directory</button>
           </a>
         </li>
@@ -21,8 +28,10 @@
     </aside>
 
     <main class="main">
-      <h1>TWS MEWG Member Directory</h1>
-      <div id="geneticists" class="grid"></div>
+      <h1>Find a Geneticist</h1>
+      <div id="geneticists" class="grid">
+        <!-- cards will go here -->
+      </div>
     </main>
   </div>
 
