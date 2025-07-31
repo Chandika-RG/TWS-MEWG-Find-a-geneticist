@@ -1,30 +1,21 @@
 // Use your actual published Google Sheet tab's GID if needed
 const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/gviz/tq?gid=174092188&tqx=out:json';
 
-let dataRows = [];
+async function fetchData() {
+  try {
+    const res = await fetch(sheetURL);
+    const text = await res.text();
 
-function fetchData() {
-  fetch(sheetURL)
-    .then(res => res.text())
-    .then(text => {
-      console.log("Raw response received from Google Sheets:");
-      console.log(text);
+    // Strip the Google wrapper to get pure JSON
+    const json = JSON.parse(text.substring(47).slice(0, -2));
+    const rows = json.table.rows;
 
-      try {
-        const json = JSON.parse(text.substring(47).slice(0, -2));
-        console.log("Parsed JSON:", json);
-
-        dataRows = json.table.rows;
-        console.log("Total rows loaded:", dataRows.length);
-
-        renderCards(dataRows);
-      } catch (err) {
-        console.error("Error parsing JSON from Google Sheets:", err);
-      }
-    })
-    .catch(err => {
-      console.error("Error fetching data:", err);
-    });
+    renderCards(rows);
+  } catch (err) {
+    console.error('Error loading or parsing Google Sheet data:', err);
+    document.getElementById('geneticists').innerHTML =
+      '<p>Error loading data. Please check the sheet URL and CORS settings.</p>';
+  }
 }
 
 function renderCards(rows) {
@@ -32,25 +23,32 @@ function renderCards(rows) {
   container.innerHTML = '';
 
   if (!rows || rows.length === 0) {
-    container.innerHTML = '<p>No data available. Please check the Google Sheet.</p>';
+    container.innerHTML = '<p>No members found. Please add entries in the Google Sheet.</p>';
     return;
   }
 
-  rows.forEach((row, index) => {
-    const cells = row.c;
-    console.log(`Row ${index + 1}:`, cells.map(c => c?.v).join(" | "));
+  rows.forEach((row) => {
+    const cells = row.c || [];
+    const name        = cells[0]?.v || 'No Name';
+    const email       = cells[1]?.v || '—';
+    const role        = cells[2]?.v || '—';
+    const institution = cells[3]?.v || '—';
+    const location    = cells[4]?.v || '—';
 
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <h3>${cells[0]?.v || 'No Name'}</h3>
-      <p><strong>Email:</strong> ${cells[1]?.v || ''}</p>
-      <p><strong>Institution:</strong> ${cells[2]?.v || ''}</p>
-      <p><strong>Expertise:</strong> ${cells[3]?.v || ''}</p>
-      <p><strong>Location:</strong> ${cells[4]?.v || ''}</p>
+      <h3>${name}</h3>
+      <p><strong>Role:</strong> ${role}</p>
+      <p><strong>Institution:</strong> ${institution}</p>
+      <p><strong>Location:</strong> ${location}</p>
+      <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
     `;
     container.appendChild(card);
   });
 }
+
+// Kick off data load on page ready
+document.addEventListener('DOMContentLoaded', fetchData);
 
 fetchData();
