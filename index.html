@@ -1,32 +1,255 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Find a Geneticist</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <title>Find a Geneticist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #ffffff;
+        }
+
+        h1 {
+            margin: 0;
+            text-align: center;
+            flex: 1;
+        }
+
+        /* Container for logo + title, center horizontally */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        /* Shrink Website column width */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #eee;
+        }
+
+        /* Shrink Website column and center text */
+        th.website-col, td.website-col {
+            width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Make website cell links */
+        td.website-col a {
+            color: #1a0dab;
+            text-decoration: none;
+            word-break: break-word;
+        }
+        td.website-col a:hover {
+            text-decoration: underline;
+        }
+
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        input {
+            padding: 8px;
+            width: 200px;
+        }
+
+        button {
+            padding: 8px 12px;
+        }
+
+        .highlight {
+            background-color: yellow;
+        }
+
+        .add-yourself-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <aside class="sidebar">
-      <h2>Quick Links</h2>
-      <ul>
-        <li><a href="#" onclick="alert('Sorting coming soon!')">Sort/Filter</a></li>
-        <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank">
-		<button>Add Yourself to the Directory</button>
-      </ul>
-    </aside>
+    <div class="header-container" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+        <img src="logo.png" alt="TWS Molecular Ecology Logo" style="height: 200px; margin-bottom: 10px;" />
+        <h1 style="margin: 0; text-align: center;">Find a Geneticist</h1>
+    </div>
 
-    <main class="main">
-      <h1>Find a Geneticist</h1>
-      <div id="geneticists" class="grid"></div>
-    </main>
-  </div>
 
-  <script src="script.js"></script>
+    <p style="text-align:center">
+        Welcome! Find a Geneticist or
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer">add yourself to the list</a>.
+    </p>
+
+    <div class="filter-container">
+        <input type="text" id="taxonFilter" placeholder="Filter by Taxon" />
+        <input type="text" id="subjectFilter" placeholder="Filter by Subject Matter" />
+        <input type="text" id="expertiseFilter" placeholder="Filter by Expertise" />
+        <button onclick="applyFilters()">Search</button>
+        <button onclick="clearFilters()">Clear</button>
+    </div>
+
+    <div id="table-container"></div>
+
+    <script>
+        const sheetUrl =
+            "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pub?gid=332580297&single=true&output=csv";
+
+        let allData = [];
+
+        function fetchData() {
+            Papa.parse(sheetUrl, {
+                download: true,
+                header: true,
+                complete: function (results) {
+                    allData = results.data.filter((row) =>
+                        Object.values(row).some((val) => val)
+                    ); // remove empty rows
+                    renderTable(allData);
+                },
+            });
+        }
+
+        function highlightMatch(text, keyword) {
+            const regex = new RegExp(`(${keyword})`, "gi");
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        function renderTable(data, keywordInfo = {}) {
+            const container = document.getElementById("table-container");
+            container.innerHTML = "";
+
+            if (!data.length) {
+                container.innerHTML = "<p>No data available.</p>";
+                return;
+            }
+
+            const table = document.createElement("table");
+            const thead = document.createElement("thead");
+            const headers = Object.keys(data[0]);
+
+            const headerRow = document.createElement("tr");
+            headers.forEach((header) => {
+                const th = document.createElement("th");
+                th.textContent = header;
+
+                // Add class to Website column header to shrink width
+                if (header.toLowerCase().includes("website")) {
+                    th.classList.add("website-col");
+                }
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement("tbody");
+            data.forEach((row) => {
+                const tr = document.createElement("tr");
+                headers.forEach((header) => {
+                    const td = document.createElement("td");
+                    let cellText = row[header] || "";
+
+                    if (keywordInfo[header]) {
+                        td.innerHTML = highlightMatch(cellText, keywordInfo[header]);
+                    } else {
+                        td.textContent = cellText;
+                    }
+
+                    // For Website column, turn text into clickable link
+                    if (header.toLowerCase().includes("website") && cellText) {
+                        // Add class for styling
+                        td.classList.add("website-col");
+
+                        // Ensure the URL starts with http/https
+                        let url = cellText.trim();
+                        if (!/^https?:\/\//i.test(url)) {
+                            url = "https://" + url;
+                        }
+
+                        td.innerHTML = `<a href="${url}" target="_blank" rel="noopener noreferrer">${cellText}</a>`;
+                    }
+
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
+
+        function applyFilters() {
+            const taxon = document.getElementById("taxonFilter").value.trim().toLowerCase();
+            const subject = document.getElementById("subjectFilter").value.trim().toLowerCase();
+            const expertise = document.getElementById("expertiseFilter").value.trim().toLowerCase();
+
+            const keywordInfo = {};
+
+            const filtered = allData.filter((row) => {
+                let match = true;
+
+                if (taxon && row["Taxon"]) {
+                    if (!row["Taxon"].toLowerCase().includes(taxon)) match = false;
+                    else keywordInfo["Taxon"] = taxon;
+                }
+
+                if (subject && row["Subject matter"]) {
+                    if (!row["Subject matter"].toLowerCase().includes(subject)) match = false;
+                    else keywordInfo["Subject matter"] = subject;
+                }
+
+                if (expertise && row["Data expertise"]) {
+                    if (!row["Data expertise"].toLowerCase().includes(expertise)) match = false;
+                    else keywordInfo["Data expertise"] = expertise;
+                }
+
+                return match;
+            });
+
+            // Bring matched rows to the top
+            const matchedRows = filtered;
+            const unmatchedRows = allData.filter((x) => !matchedRows.includes(x));
+            const finalSorted = [...matchedRows, ...unmatchedRows];
+
+            renderTable(finalSorted, keywordInfo);
+        }
+
+        function clearFilters() {
+            document.getElementById("taxonFilter").value = "";
+            document.getElementById("subjectFilter").value = "";
+            document.getElementById("expertiseFilter").value = "";
+            renderTable(allData);
+        }
+
+        fetchData();
+        setInterval(fetchData, 100000); // Refresh every 100 seconds
+    </script>
 </body>
 </html>
-
-
-
