@@ -47,17 +47,63 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Layout for header section with title and logo */
+
 .header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
+  justify-content: space-between;
   margin-bottom: 30px;
+  padding: 0 20px;
+  flex-wrap: wrap;
 }
 
+/* Title styling */
+.page-title {
+  font-size: 2.5em;
+  color: #333;
+  margin: 0;
+}
+
+
+/* Logo image aligned to the far right */
 .page-logo {
-  height: 60px;
+  height: 100px;
+  max-width: 150px;
   object-fit: contain;
 }
 
+
+/* Container for the geneticist table */
+.geneticist-table-container {
+  overflow-x: auto; /* Enables horizontal scrolling if needed on small screens */
+  background: white; /* White background for contrast */
+  border-radius: 8px; /* Rounded corners for a clean look */
+  padding: 10px; /* Space inside the container */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Soft drop shadow for depth */
+}
+
+/* Basic table styling */
+.data-table {
+  width: 100%; /* Table takes full width of container */
+  border-collapse: collapse; /* No space between cell borders */
+  font-size: 14px; /* Slightly smaller text for readability */
+}
+
+/* Header row styling */
+.data-table thead {
+  background-color: #008cba; /* TWS blue theme */
+  color: white; /* White text on colored background */
+}
+
+/* Header and cell padding and borders */
+.data-table th, .data-table td {
+  padding: 10px; /* Space inside each cell */
+  border: 1px solid #ccc; /* Light gray border for cell separation */
+  text-align: left; /* Left-align text for readability */
+}
+
+/* Zebra-striping for alternating row background */
+.data-table tr:nth-child(even) {
+  background-color: #f2f2f2; /* Light gray background for even rows */
+}
