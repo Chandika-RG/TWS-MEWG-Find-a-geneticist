@@ -46,3 +46,18 @@ body {
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+.page-logo {
+  height: 60px;
+  object-fit: contain;
+}
+
