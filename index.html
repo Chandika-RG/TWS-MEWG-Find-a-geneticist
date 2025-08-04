@@ -7,31 +7,22 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <aside class="sidebar">
-      <h2>Quick Links</h2>
-      <ul>
-        <li><a href="#" onclick="alert('Sorting coming soon!')">Sort/Filter</a></li>
-        <li>
-          <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank">
-            <button>Add Yourself to the Directory</button>
-          </a>
-        </li>
-      </ul>
-    </aside>
+  <main class="main centered">
+    <h1 class="page-title">Find a Geneticist</h1>
 
-    <main class="main">
-      <h1>Find a Geneticist</h1>
-      <div class="iframe-container">
-        <iframe 
-          src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pubhtml?gid=174092188&single=true" 
-          width="100%" height="800" frameborder="0">
-        </iframe>
-      </div>
-    </main>
-  </div>
+    <div class="quick-links">
+      <button onclick="alert('Sorting coming soon!')">Sort / Filter</button>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank">
+        <button>Add Yourself to the Directory</button>
+      </a>
+    </div>
 
-  <!-- You can remove the script if you're not using dynamic rendering anymore -->
-  <!-- <script src="script.js"></script> -->
+    <div class="iframe-container">
+      <iframe 
+        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pubhtml?gid=174092188&single=true" 
+        width="100%" height="800" frameborder="0">
+      </iframe>
+    </div>
+  </main>
 </body>
 </html>
