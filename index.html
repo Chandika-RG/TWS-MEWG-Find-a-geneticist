@@ -1,30 +1,312 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Find a Geneticist</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <title>Find a Geneticist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        h1 {
+            margin: 0;
+            text-align: center;
+        }
+
+        .header-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header-container img {
+            height: 200px;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #2e7d32;
+            color: white;
+        }
+
+        th.website-col, td.website-col {
+            width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        td.website-col a {
+            color: #1b5e20;
+            text-decoration: none;
+        }
+
+        td.website-col a:hover {
+            text-decoration: underline;
+        }
+
+        .filter-box {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+        }
+
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .filter-container label {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.9em;
+        }
+
+        input {
+            padding: 8px;
+            width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 12px;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #27642b;
+        }
+
+        .highlight {
+            background-color: yellow;
+        }
+
+        .add-yourself-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 40px;
+            color: #666;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
-  <main class="main centered">
-    <div class="header">
-      <h1 class="page-title">Find a Geneticist</h1>
-      <img src="logo.png" alt="Logo" class="page-logo">
+    <div class="header-container">
+        <a href="https://www.twsmewg.com/" target="_blank" rel="noopener noreferrer">
+            <img src="logo.png" alt="TWS Molecular Ecology Logo">
+        </a>
+        <h1>Find a Geneticist</h1>
     </div>
 
-    <div class="quick-links">
-      <button onclick="alert('Sorting coming soon!')">Sort / Filter</button>
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank">
-        <button>Add Yourself to the Directory</button>
-      </a>
+    <p style="text-align:center; max-width: 700px; margin: auto; font-size: 1.1em;">
+        This directory helps connect researchers, managers, and students to professionals applying genetic tools to the conservation and management of wildlife.
+    </p>
+
+    <div class="add-yourself-section">
+        <p>
+            Want to be listed?
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfkq8xNUQElYy65bZvJKAgnhkYHml5ktx9Aeku9faLoUFZwBg/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer">
+                Add yourself to the list
+            </a>.
+        </p>
     </div>
 
-    <div id="geneticists" class="geneticist-table-container">
-      <p>Loading data...</p>
+    <div class="filter-box">
+        <h3 style="margin-top: 0;">Search by Expertise</h3>
+        <div class="filter-container">
+            <label>Taxon:
+                <input type="text" id="taxonFilter" placeholder="e.g., Mammals">
+            </label>
+            <label>Subject:
+                <input type="text" id="subjectFilter" placeholder="e.g., Phylogeography">
+            </label>
+            <label>Expertise:
+                <input type="text" id="expertiseFilter" placeholder="e.g., RADseq">
+            </label>
+            <button onclick="applyFilters()">Search</button>
+            <button onclick="clearFilters()">Clear</button>
+        </div>
     </div>
-  </main>
 
-  <script src="script.js"></script>
+    <div id="table-container"></div>
+
+    <footer>
+        <p>
+            Maintained by the <strong>TWS Molecular Ecology Working Group</strong>.<br />
+            Maintained by Chandika RG <strong>TWS Molecular Ecology Working Group Member</strong>.<br />
+            Questions? Email us at <a href="mailto:twsmewg@gmail.com">twsmewg@gmail.com</a>
+        </p>
+    </footer>
+
+    <script>
+        const sheetUrl =
+            "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqUNyAiN6LQNXDOEKyzLECwPs1GUCFDUJlOopC6Fed3qBpir9MTctGOq9boRKIndSSxBrMvWtY4TK2/pub?gid=332580297&single=true&output=csv";
+
+        let allData = [];
+
+        function fetchData() {
+            Papa.parse(sheetUrl, {
+                download: true,
+                header: true,
+                complete: function (results) {
+                    allData = results.data.filter((row) =>
+                        Object.values(row).some((val) => val)
+                    );
+                    renderTable(allData);
+                },
+            });
+        }
+
+        function highlightMatch(text, keyword) {
+            const regex = new RegExp(`(${keyword})`, "gi");
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        function renderTable(data, keywordInfo = {}) {
+            const container = document.getElementById("table-container");
+            container.innerHTML = "";
+
+            if (!data.length) {
+                container.innerHTML = "<p>No data available.</p>";
+                return;
+            }
+
+            const table = document.createElement("table");
+            const thead = document.createElement("thead");
+            const headers = Object.keys(data[0]);
+
+            const headerRow = document.createElement("tr");
+            headers.forEach((header) => {
+                const th = document.createElement("th");
+                th.textContent = header;
+                if (header.toLowerCase().includes("website")) {
+                    th.classList.add("website-col");
+                }
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement("tbody");
+            data.forEach((row) => {
+                const tr = document.createElement("tr");
+                headers.forEach((header) => {
+                    const td = document.createElement("td");
+                    let cellText = row[header] || "";
+
+                    if (keywordInfo[header]) {
+                        td.innerHTML = highlightMatch(cellText, keywordInfo[header]);
+                    } else {
+                        td.textContent = cellText;
+                    }
+
+                    if (header.toLowerCase().includes("website") && cellText) {
+                        td.classList.add("website-col");
+                        let url = cellText.trim();
+                        if (!/^https?:\/\//i.test(url)) {
+                            url = "https://" + url;
+                        }
+                        td.innerHTML = `<a href="${url}" target="_blank" rel="noopener noreferrer">${cellText}</a>`;
+                    }
+
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
+
+        function applyFilters() {
+            const taxon = document.getElementById("taxonFilter").value.trim().toLowerCase();
+            const subject = document.getElementById("subjectFilter").value.trim().toLowerCase();
+            const expertise = document.getElementById("expertiseFilter").value.trim().toLowerCase();
+
+            const keywordInfo = {};
+
+            const filtered = allData.filter((row) => {
+                let match = true;
+
+                if (taxon && row["Taxon"]) {
+                    if (!row["Taxon"].toLowerCase().includes(taxon)) match = false;
+                    else keywordInfo["Taxon"] = taxon;
+                }
+
+                if (subject && row["Subject matter"]) {
+                    if (!row["Subject matter"].toLowerCase().includes(subject)) match = false;
+                    else keywordInfo["Subject matter"] = subject;
+                }
+
+                if (expertise && row["Data expertise"]) {
+                    if (!row["Data expertise"].toLowerCase().includes(expertise)) match = false;
+                    else keywordInfo["Data expertise"] = expertise;
+                }
+
+                return match;
+            });
+
+            const matchedRows = filtered;
+            const unmatchedRows = allData.filter((x) => !matchedRows.includes(x));
+            const finalSorted = [...matchedRows, ...unmatchedRows];
+
+            renderTable(finalSorted, keywordInfo);
+        }
+
+        function clearFilters() {
+            document.getElementById("taxonFilter").value = "";
+            document.getElementById("subjectFilter").value = "";
+            document.getElementById("expertiseFilter").value = "";
+            renderTable(allData);
+        }
+
+        fetchData();
+        setInterval(fetchData, 100000);
+    </script>
 </body>
 </html>
